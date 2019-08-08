@@ -3,6 +3,9 @@ package com.here.hackathon.xfactor.bean;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DerivedCategory {
    
   private List<String> categoryIds = new ArrayList<>();

@@ -1,8 +1,12 @@
 package com.here.hackathon.xfactor.controller;
 
 import java.util.Arrays;
+import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,23 +15,39 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.client.RestTemplate;
 
 import com.here.hackathon.xfactor.bean.DerivedCategory;
+import com.here.hackathon.xfactor.bean.Place;
+import com.here.hackathon.xfactor.bean.WebData;
 import com.here.hackathon.xfactor.service.WebDataService;
 
 @Controller
 public class PlaceSearchController implements CommandLineRunner {
+  
+  Logger logger = LoggerFactory.getLogger(PlaceSearchController.class);
+  
+  @Value( "${api.categoryDerivation.url}" )
+  private String categoryDerivationUrl;
+  
+  @Value( "${api.search.url}" )
+  private String searchApiUrl;
 
   @Autowired
   WebDataService webDataService;
 
   public void getAllWebData() {
-    webDataService.getWebData();
+    List<WebData> webPlaces= webDataService.getWebData();
+    logger.info("No of chain adresses found: " + webPlaces.size());
   }
 
-  public String getSearchPlace() {
+  public List<Place> getSearchPlace() {
     RestTemplate restTemplate = new RestTemplate();
-    String searchResult = restTemplate.getForObject("https://places.cit.api.here.com/places/v1/discover/search?"
-        + "at=20.5937,78.9629&q=Vmart&app_id=9XNDZEidH2V3NGYgqYCQ&app_code=078KbqvrokH_F9bAjFRAbw", String.class);
-    return searchResult;
+    String latlong = "20.5937,78.9629";
+    String searchQuery = "Vmart";
+    
+    String searchResult = restTemplate.getForObject(searchApiUrl + "?at=" + latlong + "&q=" + searchQuery
+        + "&app_id=9XNDZEidH2V3NGYgqYCQ&app_code=078KbqvrokH_F9bAjFRAbw", String.class);
+    System.out.println(searchResult);
+    
+    return null;
   }
 
   public void getCategoryDerivation() {
@@ -40,7 +60,7 @@ public class PlaceSearchController implements CommandLineRunner {
     input.setPlaceName("Vmart");
     input.setAdditionalText("");
 
-    ResponseEntity result = restTemplate.postForEntity("http://10.127.166.116/getPrediction", input, String.class);
+    ResponseEntity result = restTemplate.postForEntity(categoryDerivationUrl, input, String.class);
 
     System.out.println(result);
   }
